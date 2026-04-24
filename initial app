@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Landing</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2026;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #f0f0ee;
+    --muted: #6b6e78;
+    --muted2: #9499a6;
+    --accent: #c8f564;
+    --accent-dim: rgba(200,245,100,0.12);
+    --accent-glow: rgba(200,245,100,0.25);
+    --red: #ff5f5f;
+    --red-dim: rgba(255,95,95,0.12);
+    --amber: #ffb347;
+    --amber-dim: rgba(255,179,71,0.12);
+    --blue: #5fb8ff;
+    --blue-dim: rgba(95,184,255,0.12);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 20px 20px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .wordmark span { color: var(--accent); }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  .status-dot.offline { background: var(--red); box-shadow: 0 0 8px rgba(255,95,95,0.3); animation: none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* Zone tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 20px 20px 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted2);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+  }
+  .tab.active {
+    background: var(--accent-dim);
+    border-color: rgba(200,245,100,0.3);
+    color: var(--accent);
+  }
+  .tab:active { transform: scale(0.97); }
+
+  /* Zone panel */
+  .zone-panel { display: none; padding: 16px 20px 40px; }
+  .zone-panel.active { display: block; }
+
+  /* Power row */
+  .power-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .zone-label {
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .zone-label small {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .power-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+  }
+  .power-btn svg { width: 20px; height: 20px; stroke: var(--muted2); transition: stroke 0.18s; }
+  .power-btn.on {
+    background: var(--accent-dim);
+    border-color: rgba(200,245,100,0.4);
+  }
+  .power-btn.on svg { stroke: var(--accent); }
+  .power-btn:active { transform: scale(0.93); }
+
+  /* Volume card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+  .card-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .vol-display {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .vol-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 42px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--text);
+  }
+  .vol-unit {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .vol-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .vol-track-wrap { flex: 1; position: relative; height: 36px; display: flex; align-items: center; }
+  .vol-track {
+    width: 100%;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .vol-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.12s ease;
+  }
+  .vol-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 22px;
+    font-weight: 300;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s ease;
+    flex-shrink: 0;
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1;
+  }
+  .vol-btn:active { transform: scale(0.9); background: var(--accent-dim); }
+
+  /* Input grid */
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .input-btn {
+    padding: 13px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.01em;
+  }
+  .input-btn .icon { font-size: 16px; flex-shrink: 0; }
+  .input-btn:active { transform: scale(0.97); }
+  .input-btn.active {
+    background: var(--accent-dim);
+    border-color: rgba(200,245,100,0.35);
+    color: var(--accent);
+  }
+
+  /* Party mode */
+  .party-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .party-card.active {
+    background: var(--amber-dim);
+    border-color: rgba(255,179,71,0.35);
+  }
+  .party-card:active { transform: scale(0.98); }
+  .party-info .party-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .party-info .party-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .party-card.active .party-title { color: var(--amber); }
+  .toggle {
+    width: 44px; height: 26px;
+    background: var(--surface2);
+    border-radius: 13px;
+    border: 1px solid var(--border2);
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    background: var(--muted2);
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: all 0.2s ease;
+  }
+  .party-card.active .toggle {
+    background: var(--amber-dim);
+    border-color: rgba(255,179,71,0.4);
+  }
+  .party-card.active .toggle::after {
+    left: 20px;
+    background: var(--amber);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--muted2);
+    font-family: 'DM Mono', monospace;
+    transition: transform 0.25s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.ok { color: var(--accent); }
+  .toast.err { color: var(--red); }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0 16px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="wordmark">The <span>Landing</span></div>
+  <div class="status-dot" id="statusDot"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchZone('lounge')">Lounge</div>
+  <div class="tab" onclick="switchZone('living')">Living Room</div>
+  <div class="tab" onclick="switchZone('pool')">Pool</div>
+</div>
+
+<!-- LOUNGE -->
+<div class="zone-panel active" id="panel-lounge">
+  <div style="height:16px"></div>
+
+  <div class="party-card" id="party-card" onclick="toggleParty()">
+    <div class="party-info">
+      <div class="party-title">Party Mode</div>
+      <div class="party-sub">Sync all zones together</div>
+    </div>
+    <div class="toggle"></div>
+  </div>
+
+  <div class="power-row">
+    <div class="zone-label">
+      Lounge
+      <small>Main Zone</small>
+    </div>
+    <div class="power-btn on" id="power-lounge" onclick="togglePower('lounge', 'main')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+        <line x1="12" y1="2" x2="12" y2="12"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Volume</div>
+    <div class="vol-display">
+      <div class="vol-number" id="vol-lounge">42</div>
+      <div class="vol-unit">dB</div>
+    </div>
+    <div class="vol-controls">
+      <div class="vol-btn" onclick="changeVol('lounge','main',-2)">−</div>
+      <div class="vol-track-wrap">
+        <div class="vol-track">
+          <div class="vol-fill" id="volfill-lounge" style="width:52%"></div>
+        </div>
+      </div>
+      <div class="vol-btn" onclick="changeVol('lounge','main',2)">+</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Input</div>
+    <div class="input-grid" id="inputs-lounge">
+      <div class="input-btn active" onclick="selectInput('lounge','main','Apple TV',this)"><span class="icon">🍎</span>Apple TV</div>
+      <div class="input-btn" onclick="selectInput('lounge','main','AirPlay',this)"><span class="icon">📡</span>AirPlay</div>
+      <div class="input-btn" onclick="selectInput('lounge','main','Xbox',this)"><span class="icon">🎮</span>Xbox</div>
+      <div class="input-btn" onclick="selectInput('lounge','main','Reolink',this)"><span class="icon">📷</span>Reolink</div>
+      <div class="input-btn" onclick="selectInput('lounge','main','DVD',this)"><span class="icon">💿</span>DVD</div>
+      <div class="input-btn" onclick="selectInput('lounge','main','Bluetooth',this)"><span class="icon">🔵</span>Bluetooth</div>
+      <div class="input-btn" onclick="selectInput('lounge','main','Laptop',this)"><span class="icon">💻</span>Laptop</div>
+    </div>
+  </div>
+</div>
+
+<!-- LIVING ROOM -->
+<div class="zone-panel" id="panel-living">
+  <div style="height:16px"></div>
+  <div class="power-row">
+    <div class="zone-label">
+      Living Room
+      <small>Zone 2</small>
+    </div>
+    <div class="power-btn" id="power-living" onclick="togglePower('living', 'zone2')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+        <line x1="12" y1="2" x2="12" y2="12"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Volume</div>
+    <div class="vol-display">
+      <div class="vol-number" id="vol-living">35</div>
+      <div class="vol-unit">dB</div>
+    </div>
+    <div class="vol-controls">
+      <div class="vol-btn" onclick="changeVol('living','zone2',-2)">−</div>
+      <div class="vol-track-wrap">
+        <div class="vol-track">
+          <div class="vol-fill" id="volfill-living" style="width:43%"></div>
+        </div>
+      </div>
+      <div class="vol-btn" onclick="changeVol('living','zone2',2)">+</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Input</div>
+    <div class="input-grid" id="inputs-living">
+      <div class="input-btn active" onclick="selectInput('living','zone2','AirPlay',this)"><span class="icon">📡</span>AirPlay</div>
+      <div class="input-btn" onclick="selectInput('living','zone2','Bluetooth',this)"><span class="icon">🔵</span>Bluetooth</div>
+      <div class="input-btn" onclick="selectInput('living','zone2','Apple TV',this)"><span class="icon">🍎</span>Apple TV</div>
+      <div class="input-btn" onclick="selectInput('living','zone2','Laptop',this)"><span class="icon">💻</span>Laptop</div>
+    </div>
+  </div>
+</div>
+
+<!-- POOL -->
+<div class="zone-panel" id="panel-pool">
+  <div style="height:16px"></div>
+  <div class="power-row">
+    <div class="zone-label">
+      Pool
+      <small>Zone 3</small>
+    </div>
+    <div class="power-btn" id="power-pool" onclick="togglePower('pool', 'zone3')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+        <line x1="12" y1="2" x2="12" y2="12"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Volume</div>
+    <div class="vol-display">
+      <div class="vol-number" id="vol-pool">28</div>
+      <div class="vol-unit">dB</div>
+    </div>
+    <div class="vol-controls">
+      <div class="vol-btn" onclick="changeVol('pool','zone3',-2)">−</div>
+      <div class="vol-track-wrap">
+        <div class="vol-track">
+          <div class="vol-fill" id="volfill-pool" style="width:35%"></div>
+        </div>
+      </div>
+      <div class="vol-btn" onclick="changeVol('pool','zone3',2)">+</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Input</div>
+    <div class="input-grid" id="inputs-pool">
+      <div class="input-btn active" onclick="selectInput('pool','zone3','AirPlay',this)"><span class="icon">📡</span>AirPlay</div>
+      <div class="input-btn" onclick="selectInput('pool','zone3','Bluetooth',this)"><span class="icon">🔵</span>Bluetooth</div>
+      <div class="input-btn" onclick="selectInput('pool','zone3','Apple TV',this)"><span class="icon">🍎</span>Apple TV</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const AMP = 'http://10.0.0.26';
+  const state = {
+    lounge:  { vol: 42, power: true,  input: 'Apple TV' },
+    living:  { vol: 35, power: false, input: 'AirPlay'  },
+    pool:    { vol: 28, power: false, input: 'AirPlay'  },
+    party: false
+  };
+
+  // Zone → Yamaha API zone name
+  const zoneMap = { main: 'main', zone2: 'zone2', zone3: 'zone3' };
+
+  // Input name → Yamaha input ID
+  const inputMap = {
+    'Apple TV':  'hdmi1',
+    'Xbox':      'hdmi2',
+    'Reolink':   'hdmi3',
+    'DVD':       'hdmi4',
+    'AirPlay':   'airplay',
+    'Bluetooth': 'bluetooth',
+    'Laptop':    'pc'
+  };
+
+  function toast(msg, type='') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show ' + type;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.className = 'toast', 2200);
+  }
+
+  async function ampPost(zone, path, payload) {
+    const url = `${AMP}/YamahaExtendedControl/v1/${zone}/${path}`;
+    try {
+      const r = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        signal: AbortSignal.timeout(3000)
+      });
+      // MusicCast uses GET with query params for most commands
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  async function ampGet(zone, path, params='') {
+    const url = `${AMP}/YamahaExtendedControl/v1/${zone}/${path}${params ? '?'+params : ''}`;
+    try {
+      const r = await fetch(url, { mode: 'cors', signal: AbortSignal.timeout(3000) });
+      if (r.ok) { return await r.json(); }
+    } catch(e) {}
+    return null;
+  }
+
+  // Switch tab
+  function switchZone(zone) {
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      t.classList.toggle('active', ['lounge','living','pool'][i] === zone);
+    });
+    document.querySelectorAll('.zone-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-'+zone).classList.add('active');
+  }
+
+  // Power toggle
+  async function togglePower(zone, apiZone) {
+    const s = state[zone];
+    s.power = !s.power;
+    const btn = document.getElementById('power-'+zone);
+    btn.classList.toggle('on', s.power);
+    const val = s.power ? 'on' : 'standby';
+    const ok = await ampGet(apiZone, 'setPower', `power=${val}`);
+    toast(s.power ? `${zone} on` : `${zone} off`, ok ? 'ok' : 'err');
+    if (!ok) { s.power = !s.power; btn.classList.toggle('on', s.power); }
+  }
+
+  // Volume change
+  async function changeVol(zone, apiZone, delta) {
+    const s = state[zone];
+    s.vol = Math.max(0, Math.min(80, s.vol + delta));
+    document.getElementById('vol-'+zone).textContent = s.vol;
+    document.getElementById('volfill-'+zone).style.width = (s.vol/80*100)+'%';
+    // MusicCast volume is 0–161 scale (roughly 0.5dB steps)
+    const yamVol = Math.round(s.vol * 2);
+    await ampGet(apiZone, 'setVolume', `volume=${yamVol}`);
+  }
+
+  // Input select
+  async function selectInput(zone, apiZone, inputName, el) {
+    document.querySelectorAll(`#inputs-${zone} .input-btn`).forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    state[zone].input = inputName;
+    const yamInput = inputMap[inputName] || inputName.toLowerCase();
+    const ok = await ampGet(apiZone, 'setInput', `input=${yamInput}`);
+    toast(`→ ${inputName}`, ok ? 'ok' : 'err');
+  }
+
+  // Party mode
+  async function toggleParty() {
+    state.party = !state.party;
+    document.getElementById('party-card').classList.toggle('active', state.party);
+    const ok = await ampGet('main', 'setPartyMode', `enable=${state.party}`);
+    toast(state.party ? 'Party mode on 🎉' : 'Party mode off', ok ? 'ok' : 'err');
+  }
+
+  // Poll amp status on load
+  async function pollStatus() {
+    const dot = document.getElementById('statusDot');
+    const zones = [['main','lounge'],['zone2','living'],['zone3','pool']];
+    let anyOk = false;
+    for (const [apiZone, uiZone] of zones) {
+      const data = await ampGet(apiZone, 'getStatus');
+      if (data && data.response_code === 0) {
+        anyOk = true;
+        const s = state[uiZone];
+        s.power = data.power === 'on';
+        s.vol = Math.round((data.volume || 84) / 2);
+        s.input = data.input || s.input;
+        // Update UI
+        document.getElementById('power-'+uiZone).classList.toggle('on', s.power);
+        document.getElementById('vol-'+uiZone).textContent = s.vol;
+        document.getElementById('volfill-'+uiZone).style.width = (s.vol/80*100)+'%';
+        // Mark active input
+        document.querySelectorAll(`#inputs-${uiZone} .input-btn`).forEach(btn => {
+          const match = Object.entries(inputMap).find(([k,v]) => v === data.input);
+          if (match) btn.classList.toggle('active', btn.textContent.trim().startsWith(match[0]));
+        });
+      }
+    }
+    dot.className = 'status-dot' + (anyOk ? '' : ' offline');
+  }
+
+  pollStatus();
+  setInterval(pollStatus, 15000);
+</script>
+</body>
+</html>
